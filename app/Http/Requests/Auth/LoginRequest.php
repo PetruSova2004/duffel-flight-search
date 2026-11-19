@@ -29,7 +29,6 @@ class LoginRequest extends FormRequest
      * Checks credentials with a per e-mail + IP attempt limit.
      *
      * @return void
-     *
      * @throws ValidationException
      */
     public function authenticate(): void
@@ -56,7 +55,6 @@ class LoginRequest extends FormRequest
 
     /**
      * @return void
-     *
      * @throws ValidationException
      */
     private function ensureIsNotRateLimited(): void

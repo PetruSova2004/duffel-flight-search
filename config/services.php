@@ -28,6 +28,16 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'duffel' => [
+        'token' => env('DUFFEL_TOKEN'),
+        'base_url' => env('DUFFEL_BASE_URL', 'https://api.duffel.com'),
+        'version' => 'v2',
+        // Offer search may take up to 30 s on Duffel's side
+        'timeout' => (int) env('DUFFEL_TIMEOUT', 45),
+        'connect_timeout' => (int) env('DUFFEL_CONNECT_TIMEOUT', 10),
+        'places_ttl' => (int) env('DUFFEL_PLACES_TTL', 86400),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

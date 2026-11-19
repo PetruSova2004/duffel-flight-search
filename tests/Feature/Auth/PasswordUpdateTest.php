@@ -24,7 +24,7 @@ class PasswordUpdateTest extends TestCase
             ->assertRedirect(route('password.edit'))
             ->assertSessionHas('status');
 
-        $this->assertTrue(Hash::check('newSecret42', $user->fresh()->password));
+        $this->assertTrue(Hash::check('newSecret42', $user->refresh()->password));
     }
 
     public function test_current_password_must_be_correct(): void
@@ -39,7 +39,7 @@ class PasswordUpdateTest extends TestCase
             ])
             ->assertSessionHasErrors('current_password');
 
-        $this->assertTrue(Hash::check('password', $user->fresh()->password));
+        $this->assertTrue(Hash::check('password', $user->refresh()->password));
     }
 
     public function test_new_password_must_differ_from_current(): void

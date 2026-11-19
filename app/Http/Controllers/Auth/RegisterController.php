@@ -21,7 +21,7 @@ class RegisterController extends Controller
     }
 
     /**
-     * @param  RegisterRequest  $request
+     * @param RegisterRequest $request
      * @return RedirectResponse
      */
     public function store(RegisterRequest $request): RedirectResponse

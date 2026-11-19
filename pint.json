@@ -2,6 +2,9 @@
     "preset": "laravel",
     "rules": {
         "no_superfluous_phpdoc_tags": false,
-        "no_empty_phpdoc": true
+        "phpdoc_align": {
+            "align": "left"
+        },
+        "phpdoc_separation": false
     }
 }

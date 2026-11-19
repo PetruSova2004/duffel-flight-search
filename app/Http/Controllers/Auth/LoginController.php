@@ -21,9 +21,8 @@ class LoginController extends Controller
     }
 
     /**
-     * @param  LoginRequest  $request
+     * @param LoginRequest $request
      * @return RedirectResponse
-     *
      * @throws ValidationException
      */
     public function store(LoginRequest $request): RedirectResponse
@@ -35,7 +34,7 @@ class LoginController extends Controller
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      * @return RedirectResponse
      */
     public function destroy(Request $request): RedirectResponse

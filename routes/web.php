@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\CityController;
 use App\Http\Controllers\FlightSearchController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,4 +24,5 @@ Route::middleware('auth')->group(function () {
     Route::put('account/password', [PasswordController::class, 'update'])->name('password.update');
 
     Route::get('flights', [FlightSearchController::class, 'index'])->name('flights.index');
+    Route::get('flights/cities', [CityController::class, 'index'])->middleware('throttle:60,1')->name('flights.cities');
 });

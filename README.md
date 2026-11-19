@@ -1,58 +1,184 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SkyRoute — поиск авиабилетов через Duffel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Небольшое приложение на Laravel: регистрация и вход клиентов, три страницы с разным доступом и поиск рейсов в одну сторону через [Duffel API v2](https://duffel.com/docs).
 
-## About Laravel
+Репозиторий: https://github.com/PetruSova2004/duffel-flight-search
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Содержание
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- [Стек](#стек)
+- [Быстрый старт](#быстрый-старт)
+- [Токен Duffel](#токен-duffel)
+- [Проверки кода](#проверки-кода)
+- [Возможности](#возможности)
+- [Как это устроено](#как-это-устроено)
+- [Принятые решения](#принятые-решения)
+- [Безопасность](#безопасность)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Стек
 
-## Learning Laravel
+| Что | Версия |
+|---|---|
+| PHP | 8.3+ (расширения `intl`, `pdo_sqlite` или `pdo_mysql`) |
+| Laravel | 13 |
+| БД | SQLite (по умолчанию) или MySQL 8 |
+| Фронтенд | Blade + Tailwind CSS 4 + Alpine.js, сборка через Vite |
+| Node.js | 20+ (в репозитории `.nvmrc` с версией 22) |
+| Тесты и качество | PHPUnit, Laravel Pint, Larastan (PHPStan, уровень 8) |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Docker не нужен: проект запускается встроенным сервером Laravel и SQLite-файлом.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Быстрый старт
 
 ```bash
-composer require laravel/boost --dev
+git clone https://github.com/PetruSova2004/duffel-flight-search.git
+cd duffel-flight-search
 
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
+
+# впишите токен Duffel в .env: DUFFEL_TOKEN=duffel_test_...
+
+touch database/database.sqlite
+php artisan migrate
+
+npm install
+npm run build
+
+php artisan duffel:warm-places   # загрузить страны и города (≈ 6 секунд)
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Откройте http://127.0.0.1:8000, зарегистрируйтесь и перейдите в «Поиск билетов».
+Для разработки вместо `npm run build` удобнее `composer run dev` — он поднимает сервер, Vite и просмотр логов одной командой.
 
-## Contributing
+**Пример поиска:** Великобритания → London (LON), США → New York (NYC), любая дата в ближайшие месяцы.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Токен Duffel
 
-## Code of Conduct
+1. Регистрация: https://dashboard.duffel.com/join
+2. В дашборде включён **Test mode**.
+3. **More → Developers → Access tokens → Create**, достаточно прав **Read-only**.
+4. Токен вида `duffel_test_…` указывается только в `.env` (`DUFFEL_TOKEN=`). В репозиторий он не попадает, а в браузер не уходит никогда: все запросы к Duffel идут с сервера.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+В тестовом режиме Duffel возвращает реальные маршруты и тестовую авиакомпанию «Duffel Airways».
 
-## Security Vulnerabilities
+Необязательные настройки (значения по умолчанию в `config/services.php`):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Ключ | По умолчанию | Зачем |
+|---|---|---|
+| `DUFFEL_TIMEOUT` | 28 | таймаут HTTP-запроса, сек; меньше `max_execution_time` PHP (30 с), чтобы долгий поиск заканчивался понятной ошибкой, а не обрывом скрипта |
+| `DUFFEL_CONNECT_TIMEOUT` | 10 | таймаут соединения, сек |
+| `DUFFEL_SUPPLIER_TIMEOUT` | 20000 | сколько Duffel ждёт авиакомпании, мс |
+| `DUFFEL_PLACES_TTL` | 172800 | срок кеша стран и городов, сек (двое суток: если ежедневное обновление не удалось, остаётся старый список) |
 
-## License
+## Проверки кода
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan test     # 62 теста: авторизация, доступы, клиент Duffel, справочник, поиск, некорректный ввод
+composer lint        # стиль кода (Laravel Pint, пресет laravel)
+composer analyse     # статический анализ (Larastan, уровень 8)
+```
+
+Тесты не ходят в настоящий Duffel: ответы подменяются через `Http::fake()`, реальные запросы из тестов запрещены. Для поиска используется урезанный настоящий ответ Duffel (`tests/Fixtures/duffel/offer_request.json`).
+
+## Возможности
+
+**Авторизация**
+- Регистрация: имя, e-mail (уникальный, приводится к нижнему регистру), пароль не короче 8 символов с буквами и цифрами и его подтверждение. После регистрации клиент сразу авторизован и попадает на поиск.
+- Вход с флажком «Запомнить меня». Не больше 5 попыток в минуту на пару «e-mail + IP», ошибка всегда одна: «Неверный e-mail или пароль».
+- Выход только через POST с CSRF, сессия инвалидируется.
+- Пароли хранятся только хешем (каст `hashed`).
+- После входа клиент возвращается туда, куда шёл (`redirect()->intended()`).
+
+**Страницы и навигация**
+
+| Страница | Адрес | Доступ |
+|---|---|---|
+| Главная | `/` | все; гостю кнопки «Войти / Зарегистрироваться», клиенту «Искать билеты» |
+| Вход, регистрация | `/login`, `/register` | только гость (`guest`), клиента перенаправляет на поиск |
+| Поиск билетов | `/flights` | только клиент (`auth`), гостя отправляет на вход и возвращает обратно; форма и результаты на одной странице |
+
+Доступ задают middleware в `routes/web.php`, а не проверки в шаблонах. Одна шапка на всех страницах, текущий пункт выделен, на телефоне меню сворачивается в «бургер». Все страницы ошибок (404, 419, 429, 500 и общие 4xx/5xx) сделаны в общем дизайне. На 404 вошедший пользователь видит свою шапку.
+
+**Поиск через Duffel**
+- Форма: дата (от сегодня до +330 дней), страна и город отправления, страна и город прибытия. Выпадающие списки с поиском и управлением с клавиатуры. Город неактивен, пока не выбрана страна. Город прибытия не может совпадать с городом отправления.
+- Валидация через Form Request, введённые значения сохраняются после ошибки.
+- Запрос `POST /air/offer_requests?return_offers=true`: один участок, один взрослый, эконом; заголовки `Authorization`, `Duffel-Version: v2`, `Accept`, `Accept-Encoding: gzip`.
+- Обрабатываются ошибки 401, 422, 429, 5xx и отсутствие связи. Пользователь видит понятный текст, подробности (статус, `x-request-id`, коды ошибок Duffel) пишутся в лог без токена.
+- Результаты: все предложения, по умолчанию сначала дешёвые. В карточке сразу видны время вылета и прилёта с пометкой «+1», длительность («7 ч 58 мин»), пересадки с ожиданием и цена («218,22 €»). Там же тариф, багаж, CO₂ и срок действия цены.
+- Под кнопкой «Подробнее» — каждый сегмент: аэропорты и терминалы, тип самолёта, перевозчик-оператор, если он другой.
+- Сортировка по цене, времени вылета и длительности.
+- Во время поиска кнопка неактивна, виден индикатор «Ищем рейсы…», повторный клик не создаёт второй запрос. Пустой результат и ошибка показываются отдельными экранами с подсказкой.
+
+**Дополнительно**
+- Смена пароля (`/account/password`, ссылка с именем в шапке). Нужен старый пароль, после смены другие устройства разлогиниваются.
+- Кнопка «показать пароль» в полях пароля.
+- Дополнительные лимиты: 20 попыток входа в минуту с одного IP, 5 регистраций в минуту с IP, 6 попыток смены пароля в минуту, 10 поисков в минуту на пользователя.
+- Защитные HTTP-заголовки (см. «Безопасность»).
+- Команда `duffel:warm-places` и ежедневное обновление справочника по расписанию.
+
+## Как это устроено
+
+```
+app/
+├── Console/Commands/WarmDuffelPlaces.php   # прогрев кеша стран и городов
+├── Data/Flights/                           # DTO: Offer, Segment, FlightPoint, Layover, Carrier, Money…
+├── Http/
+│   ├── Controllers/Auth/                   # Register, Login (вход и выход), Password
+│   ├── Controllers/FlightSearchController  # форма и результаты
+│   ├── Controllers/CityController          # JSON: города страны для формы
+│   ├── Middleware/SecurityHeaders.php
+│   └── Requests/                           # вся валидация (Form Request)
+├── Rules/CityInCountry.php                 # город есть в справочнике для выбранной страны
+├── Services/
+│   ├── Duffel/DuffelClient.php             # только HTTP: заголовки, таймауты, ошибки
+│   ├── Duffel/PlaceDirectory.php           # справочник стран и городов с кешем
+│   └── Flights/                            # FlightSearchService + OfferMapper
+└── Support/Format.php                      # даты, длительность и цена по-русски
+lang/ru/                                    # все тексты интерфейса
+resources/js/components/                    # combobox, форма поиска, сортировка
+resources/views/                            # layout, компоненты, страницы
+```
+
+**Путь поискового запроса:**
+
+```
+GET /flights?departure_date=…&origin=…
+  → FlightSearchRequest   проверяет дату, страны и города, собирает SearchCriteria
+  → FlightSearchService   отправляет offer request через DuffelClient
+  → OfferMapper           превращает JSON Duffel в DTO (Offer, Segment…)
+  → Blade                 выводит готовые объекты, без разбора сырого ответа
+```
+
+Контроллеры тонкие: валидация в Form Request, работа с API в сервисах, преобразование данных в маппере, форматирование в `Support\Format`.
+
+## Принятые решения
+
+**Авторизация своя, без Breeze и Fortify.** Нужны только регистрация, вход, выход и смена пароля. Своя реализация — это три контроллера и три Form Request: весь код на виду, каждое правило лежит в понятном месте. Starter kit принёс бы много неиспользуемого (подтверждение почты, профиль, свои шаблоны).
+
+**Как собираются страны и города.** Справочник строится из `GET /air/airports`: около 9 000 аэропортов, 46 страниц по 200 записей, примерно 6 секунд.
+- Страны — это уникальные `iata_country_code` всех аэропортов. Названия по-русски даёт расширение `intl` (`Locale::getDisplayRegion`), сортировка по алфавиту через `Collator`.
+- Город — это IATA-агломерация, если аэропорт в неё входит. Например, London (LON) объединяет Heathrow, Gatwick и другие аэропорты города. Иначе городом считается сам аэропорт. Duffel принимает оба вида кодов, поэтому в списке остаются только места, откуда реально можно лететь.
+- Результат (235 стран, около 8 700 городов) хранится в кеше 24 часа. Его заранее заполняет команда `duffel:warm-places`, а планировщик Laravel (`php artisan schedule:run` в cron) обновляет его каждый день в 03:00. Если кеш пуст, данные строит только один запрос: остальные ждут его под блокировкой и не долбят Duffel параллельно.
+- `GET /air/cities` не подошёл: в нём только 255 агломераций, и тысячи городов с одним аэропортом пропали бы. `places/suggestions` ищет по строке и не умеет «все города страны».
+
+**Поиск обычным GET-запросом на `/flights` с серверной отрисовкой.** Без параметров страница показывает форму, с параметрами — ещё и результаты. Ссылку на результаты можно обновить и переслать, а форма работает как обычная форма Laravel со старыми значениями и ошибками. Сортировка выполняется в браузере и мгновенно, без повторного запроса к Duffel.
+
+**Результаты поиска не кешируются.** Сырой ответ весит до 2 МБ, а цены у Duffel меняются от запроса к запросу. Частоту поисков ограничивает лимит в 10 запросов в минуту.
+
+**Дата «сегодня» считается в часовом поясе приложения** (`APP_TIMEZONE`, в примере — `Europe/Kyiv`). Браузер не сообщает серверу свой часовой пояс, поэтому граница дня берётся из настройки, а не из UTC.
+
+## Безопасность
+
+- CSRF на всех формах, выход только через POST.
+- После входа и регистрации сессия пересоздаётся (защита от фиксации сессии), при выходе инвалидируется.
+- Пароли хранятся хешем. Правила пароля заданы в одном месте (`Password::defaults()`).
+- Ошибка входа не выдаёт, существует ли e-mail. Есть лимиты на вход, регистрацию и поиск.
+- После смены пароля остальные сессии и cookie «Запомнить меня» перестают действовать (`AuthenticateSession`).
+- Токен Duffel только в `.env` и только на сервере, в лог не пишется.
+- Коды городов проверяются по своему справочнику, в Duffel уходят только проверенные значения.
+- Все данные в Blade экранируются. В JavaScript данные передаются через `@js`.
+- Заголовки `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, а по HTTPS ещё и `Strict-Transport-Security`.
+- В кеш кладутся только массивы. В Laravel 13 по умолчанию `serializable_classes = false`, и десериализация объектов из кеша запрещена.

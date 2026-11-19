@@ -2,23 +2,38 @@
 
 namespace App\Providers;
 
+use App\Http\Requests\Flights\FlightSearchRequest;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
-
-    /**
-     * Bootstrap any application services.
+     * @return void
      */
     public function boot(): void
     {
-        //
+        Password::defaults(fn () => Password::min(8)->letters()->numbers());
+
+        $this->configureRateLimiting();
+    }
+
+    /**
+     * @return void
+     */
+    private function configureRateLimiting(): void
+    {
+        // Per-IP cap on top of the per e-mail limit in LoginRequest (credential stuffing)
+        RateLimiter::for('login', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
+
+        RateLimiter::for('register', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+
+        // Only real searches count: each one is a call to airlines on Duffel's side
+        RateLimiter::for('flight-search', fn (Request $request) => $request->hasAny(FlightSearchRequest::FIELDS)
+            ? Limit::perMinute(10)->by($request->user()?->id ?: $request->ip())
+            : Limit::none());
     }
 }

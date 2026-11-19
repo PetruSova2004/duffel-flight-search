@@ -35,6 +35,7 @@ return [
         // Offer search may take up to 30 s on Duffel's side
         'timeout' => (int) env('DUFFEL_TIMEOUT', 45),
         'connect_timeout' => (int) env('DUFFEL_CONNECT_TIMEOUT', 10),
+        'supplier_timeout' => (int) env('DUFFEL_SUPPLIER_TIMEOUT', 20000),
         'places_ttl' => (int) env('DUFFEL_PLACES_TTL', 86400),
     ],
 

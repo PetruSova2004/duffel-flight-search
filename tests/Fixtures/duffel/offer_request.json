@@ -1,0 +1,235 @@
+{
+  "data": {
+    "slices": [
+      {
+        "origin": {
+          "name": "London"
+        },
+        "destination": {
+          "name": "New York"
+        }
+      }
+    ],
+    "offers": [
+      {
+        "id": "off_0350FedIfyq1ZRtW0NIb0S",
+        "owner": {
+          "iata_code": "TS",
+          "name": "Air Transat",
+          "logo_symbol_url": "https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/TS.svg"
+        },
+        "total_amount": "670.26",
+        "total_currency": "EUR",
+        "expires_at": "2099-01-01T00:00:00Z",
+        "total_emissions_kg": "347",
+        "slices": [
+          {
+            "origin": {
+              "iata_code": "LGW",
+              "name": "Gatwick Airport",
+              "city_name": "London",
+              "time_zone": "Europe/London",
+              "type": "airport"
+            },
+            "destination": {
+              "iata_code": "LGA",
+              "name": "LaGuardia Airport",
+              "city_name": "New York",
+              "time_zone": "America/New_York",
+              "type": "airport"
+            },
+            "duration": "PT13H22M",
+            "fare_brand_name": "Economy Budget",
+            "segments": [
+              {
+                "origin": {
+                  "iata_code": "LGW",
+                  "name": "Gatwick Airport",
+                  "city_name": "London",
+                  "time_zone": "Europe/London",
+                  "type": "airport"
+                },
+                "destination": {
+                  "iata_code": "YYZ",
+                  "name": "Toronto Pearson International Airport",
+                  "city_name": "Toronto",
+                  "time_zone": "America/Toronto",
+                  "type": "airport"
+                },
+                "origin_terminal": null,
+                "destination_terminal": null,
+                "departing_at": "2026-12-19T11:40:00",
+                "arriving_at": "2026-12-19T15:00:00",
+                "duration": "PT8H20M",
+                "aircraft": {
+                  "name": "Airbus A321neo"
+                },
+                "marketing_carrier": {
+                  "iata_code": "TS",
+                  "name": "Air Transat",
+                  "logo_symbol_url": "https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/TS.svg"
+                },
+                "operating_carrier": {
+                  "iata_code": "TS",
+                  "name": "Air Transat",
+                  "logo_symbol_url": "https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/TS.svg"
+                },
+                "marketing_carrier_flight_number": "0123",
+                "passengers": [
+                  {
+                    "cabin_class": "economy",
+                    "cabin_class_marketing_name": "Economy",
+                    "baggages": [
+                      {
+                        "type": "checked",
+                        "quantity": 1
+                      },
+                      {
+                        "type": "carry_on",
+                        "quantity": 1
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "origin": {
+                  "iata_code": "YYZ",
+                  "name": "Toronto Pearson International Airport",
+                  "city_name": "Toronto",
+                  "time_zone": "America/Toronto",
+                  "type": "airport"
+                },
+                "destination": {
+                  "iata_code": "LGA",
+                  "name": "LaGuardia Airport",
+                  "city_name": "New York",
+                  "time_zone": "America/New_York",
+                  "type": "airport"
+                },
+                "origin_terminal": null,
+                "destination_terminal": null,
+                "departing_at": "2026-12-19T18:20:00",
+                "arriving_at": "2026-12-19T20:02:00",
+                "duration": "PT1H42M",
+                "aircraft": {
+                  "name": "Embraer 195 E2"
+                },
+                "marketing_carrier": {
+                  "iata_code": "TS",
+                  "name": "Air Transat",
+                  "logo_symbol_url": "https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/TS.svg"
+                },
+                "operating_carrier": {
+                  "iata_code": "PD",
+                  "name": "Porter Airlines",
+                  "logo_symbol_url": "https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/PD.svg"
+                },
+                "marketing_carrier_flight_number": "7607",
+                "passengers": [
+                  {
+                    "cabin_class": "economy",
+                    "cabin_class_marketing_name": "Economy",
+                    "baggages": [
+                      {
+                        "type": "checked",
+                        "quantity": 1
+                      },
+                      {
+                        "type": "carry_on",
+                        "quantity": 1
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "off_0350FeYjgvRvNi3GkywjuC",
+        "owner": {
+          "iata_code": "IB",
+          "name": "Iberia",
+          "logo_symbol_url": "https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/IB.svg"
+        },
+        "total_amount": "218.22",
+        "total_currency": "EUR",
+        "expires_at": "2099-01-01T00:00:00Z",
+        "total_emissions_kg": "472",
+        "slices": [
+          {
+            "origin": {
+              "iata_code": "LHR",
+              "name": "Heathrow Airport",
+              "city_name": "London",
+              "time_zone": "Europe/London",
+              "type": "airport"
+            },
+            "destination": {
+              "iata_code": "JFK",
+              "name": "John F. Kennedy International Airport",
+              "city_name": "New York",
+              "time_zone": "America/New_York",
+              "type": "airport"
+            },
+            "duration": "PT7H58M",
+            "fare_brand_name": "Basic",
+            "segments": [
+              {
+                "origin": {
+                  "iata_code": "LHR",
+                  "name": "Heathrow Airport",
+                  "city_name": "London",
+                  "time_zone": "Europe/London",
+                  "type": "airport"
+                },
+                "destination": {
+                  "iata_code": "JFK",
+                  "name": "John F. Kennedy International Airport",
+                  "city_name": "New York",
+                  "time_zone": "America/New_York",
+                  "type": "airport"
+                },
+                "origin_terminal": "2",
+                "destination_terminal": "1",
+                "departing_at": "2026-12-19T13:56:00",
+                "arriving_at": "2026-12-19T16:54:00",
+                "duration": "PT7H58M",
+                "aircraft": null,
+                "marketing_carrier": {
+                  "iata_code": "IB",
+                  "name": "Iberia",
+                  "logo_symbol_url": "https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/IB.svg"
+                },
+                "operating_carrier": {
+                  "iata_code": "IB",
+                  "name": "Iberia",
+                  "logo_symbol_url": "https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/IB.svg"
+                },
+                "marketing_carrier_flight_number": "3167",
+                "passengers": [
+                  {
+                    "cabin_class": "economy",
+                    "cabin_class_marketing_name": "Economy",
+                    "baggages": [
+                      {
+                        "type": "checked",
+                        "quantity": 1
+                      },
+                      {
+                        "type": "carry_on",
+                        "quantity": 1
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

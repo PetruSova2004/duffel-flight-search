@@ -37,5 +37,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('login', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
 
         RateLimiter::for('register', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+
+        // Each search is a paid-for call to airlines on Duffel's side
+        RateLimiter::for('flight-search', fn (Request $request) => Limit::perMinute(10)->by($request->user()?->id ?: $request->ip()));
     }
 }

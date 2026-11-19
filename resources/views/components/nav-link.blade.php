@@ -1,7 +1,7 @@
-@props(['route', 'mobile' => false])
+@props(['route', 'active' => null, 'mobile' => false])
 
 @php
-    $active = request()->routeIs($route);
+    $active = request()->routeIs($active ?? $route);
 @endphp
 
 <a href="{{ route($route) }}"

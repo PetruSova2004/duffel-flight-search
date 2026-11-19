@@ -1,11 +1,12 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "petrusova2004/duffel-flight-search",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Laravel app: customer auth and one-way flight search via Duffel API.",
     "keywords": [
         "laravel",
-        "framework"
+        "duffel",
+        "flights"
     ],
     "license": "MIT",
     "require": {

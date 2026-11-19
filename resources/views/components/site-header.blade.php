@@ -10,7 +10,7 @@
         <nav class="hidden items-center gap-1 md:flex" aria-label="{{ __('app.nav.menu') }}">
             <x-nav-link route="home">{{ __('app.nav.home') }}</x-nav-link>
             @auth
-                <x-nav-link route="flights.index">{{ __('app.nav.flights') }}</x-nav-link>
+                <x-nav-link route="flights.index" active="flights.*">{{ __('app.nav.flights') }}</x-nav-link>
             @endauth
         </nav>
 
@@ -50,7 +50,7 @@
         <div class="space-y-1 px-4 py-3">
             <x-nav-link route="home" mobile>{{ __('app.nav.home') }}</x-nav-link>
             @auth
-                <x-nav-link route="flights.index" mobile>{{ __('app.nav.flights') }}</x-nav-link>
+                <x-nav-link route="flights.index" active="flights.*" mobile>{{ __('app.nav.flights') }}</x-nav-link>
                 <div class="mt-2 border-t border-slate-100 pt-3">
                     <p class="truncate px-3 pb-1 text-xs text-slate-500">{{ auth()->user()->name }}</p>
                     <x-nav-link route="password.edit" mobile>{{ __('app.nav.password') }}</x-nav-link>

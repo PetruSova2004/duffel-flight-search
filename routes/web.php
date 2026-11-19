@@ -24,5 +24,6 @@ Route::middleware('auth')->group(function () {
     Route::put('account/password', [PasswordController::class, 'update'])->name('password.update');
 
     Route::get('flights', [FlightSearchController::class, 'index'])->name('flights.index');
+    Route::get('flights/search', [FlightSearchController::class, 'search'])->middleware('throttle:flight-search')->name('flights.search');
     Route::get('flights/cities', [CityController::class, 'index'])->middleware('throttle:60,1')->name('flights.cities');
 });

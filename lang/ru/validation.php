@@ -6,6 +6,7 @@ return [
     'before_or_equal' => 'Поле «:attribute» должно быть не позже :date.',
     'alpha' => 'Поле «:attribute» может содержать только буквы.',
     'boolean' => 'Поле «:attribute» должно быть да или нет.',
+    'city_in_country' => 'Выберите город из списка для выбранной страны.',
     'confirmed' => 'Пароли не совпадают.',
     'current_password' => 'Неверный текущий пароль.',
     'date' => 'Поле «:attribute» должно быть датой.',

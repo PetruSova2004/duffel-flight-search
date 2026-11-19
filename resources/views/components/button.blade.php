@@ -1,8 +1,13 @@
-@props(['variant' => 'primary', 'href' => null])
+@props(['variant' => 'primary', 'size' => 'md', 'href' => null])
 
 @php
-    $base = 'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition '
+    $base = 'inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition '
         . 'disabled:cursor-not-allowed disabled:opacity-60';
+
+    $sizes = [
+        'md' => 'px-4 py-2.5 text-sm',
+        'lg' => 'px-6 py-3 text-base',
+    ];
 
     $variants = [
         'primary' => 'bg-brand-600 text-white shadow-sm hover:bg-brand-700',
@@ -10,7 +15,7 @@
         'ghost' => 'text-slate-700 hover:bg-slate-100',
     ];
 
-    $classes = $base.' '.($variants[$variant] ?? $variants['primary']);
+    $classes = implode(' ', [$base, $sizes[$size] ?? $sizes['md'], $variants[$variant] ?? $variants['primary']]);
 @endphp
 
 @if ($href)

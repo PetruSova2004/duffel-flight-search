@@ -20,6 +20,9 @@ class DuffelClient
 {
     private const int PAGE_LIMIT = 200;
 
+    /** Safety net against a cursor that never ends (≈ 46 pages of airports today) */
+    private const int MAX_PAGES = 200;
+
     /**
      * @param string|null $token
      * @param string $baseUrl
@@ -80,6 +83,7 @@ class DuffelClient
     private function pages(string $uri, array $query): Generator
     {
         $after = null;
+        $pages = 0;
 
         do {
             $page = $this->get($uri, array_filter([...$query, 'limit' => self::PAGE_LIMIT, 'after' => $after]));
@@ -88,7 +92,15 @@ class DuffelClient
                 yield $item;
             }
 
-            $after = $page['meta']['after'] ?? null;
+            $next = $page['meta']['after'] ?? null;
+
+            if ($next !== null && ($next === $after || ++$pages >= self::MAX_PAGES)) {
+                Log::error('Duffel pagination stopped', ['uri' => $uri, 'pages' => $pages]);
+
+                throw new DuffelException(DuffelErrorType::Unknown, 'Pagination did not finish');
+            }
+
+            $after = $next;
         } while ($after !== null);
     }
 
@@ -103,7 +115,7 @@ class DuffelClient
     private function send(string $method, string $uri, array $query = [], ?array $body = null): array
     {
         try {
-            $response = $this->request($method === 'GET')->send($method, $uri, array_filter([
+            $response = $this->pendingRequest($method === 'GET')->send($method, $uri, array_filter([
                 'query' => $query ?: null,
                 'json' => $body,
             ]));
@@ -117,7 +129,15 @@ class DuffelClient
             throw $this->failure($method, $uri, $response);
         }
 
-        return $response->json() ?? [];
+        $json = $response->json();
+
+        if (! is_array($json)) {
+            Log::error('Duffel returned a non-JSON body', ['method' => $method, 'uri' => $uri, 'status' => $response->status()]);
+
+            throw new DuffelException(DuffelErrorType::Unknown, 'Unexpected response body');
+        }
+
+        return $json;
     }
 
     /**
@@ -125,7 +145,7 @@ class DuffelClient
      * @return PendingRequest
      * @throws DuffelException
      */
-    private function request(bool $retryable): PendingRequest
+    private function pendingRequest(bool $retryable): PendingRequest
     {
         if ($this->token === null || $this->token === '') {
             Log::error('Duffel token is not configured (DUFFEL_TOKEN).');

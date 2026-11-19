@@ -21,9 +21,11 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
 
     Route::get('account/password', [PasswordController::class, 'edit'])->name('password.edit');
-    Route::put('account/password', [PasswordController::class, 'update'])->name('password.update');
+    Route::put('account/password', [PasswordController::class, 'update'])->middleware('throttle:6,1')->name('password.update');
 
-    Route::get('flights', [FlightSearchController::class, 'index'])->name('flights.index');
-    Route::get('flights/search', [FlightSearchController::class, 'search'])->middleware('throttle:flight-search')->name('flights.search');
+    Route::get('flights', [FlightSearchController::class, 'index'])->middleware('throttle:flight-search')->name('flights.index');
     Route::get('flights/cities', [CityController::class, 'index'])->middleware('throttle:60,1')->name('flights.cities');
 });
+
+// Runs through the web group, so a 404 still knows the logged-in user
+Route::fallback(fn () => abort(404));

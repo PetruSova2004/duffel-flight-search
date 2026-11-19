@@ -5,6 +5,7 @@ namespace App\Services\Flights;
 use App\Data\Flights\Offer;
 use App\Data\Flights\SearchResult;
 use App\Services\Duffel\DuffelClient;
+use App\Services\Duffel\DuffelErrorType;
 use App\Services\Duffel\DuffelException;
 use Illuminate\Container\Attributes\Config;
 use Illuminate\Support\Facades\Log;
@@ -47,9 +48,16 @@ class FlightSearchService
 
         $data = $response['data'] ?? [];
         $slice = $data['slices'][0] ?? [];
+        $raw = $data['offers'] ?? [];
+        $offers = $this->offers($raw);
+
+        // Every offer broken means the format changed, not "no flights"
+        if ($raw !== [] && $offers === []) {
+            throw new DuffelException(DuffelErrorType::Unknown, 'No offer could be mapped');
+        }
 
         return new SearchResult(
-            offers: $this->offers($data['offers'] ?? []),
+            offers: $offers,
             departureDate: $criteria->departureDate,
             originName: $slice['origin']['name'] ?? $criteria->origin,
             destinationName: $slice['destination']['name'] ?? $criteria->destination,

@@ -21,7 +21,9 @@ class FormatTest extends TestCase
         $date = CarbonImmutable::parse('2026-12-12 08:05');
 
         $this->assertSame("245,90\u{a0}€", Format::money(new Money('245.90', 'EUR')));
-        $this->assertSame('12 дек 2026', Format::date($date));
+        $this->assertSame('12 дек. 2026', Format::date($date));
+        $this->assertSame('сб, 12 дек.', Format::shortDate($date));
+        $this->assertSame('эконом', Format::cabin('economy'));
         $this->assertSame('08:05', Format::time($date));
     }
 }

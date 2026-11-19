@@ -34,7 +34,7 @@ class OfferMapperTest extends TestCase
         $this->assertSame('2026-12-19 13:56 Europe/London', $offer->departure()->at->format('Y-m-d H:i e'));
         $this->assertSame('2026-12-19 16:54 America/New_York', $offer->arrival()->at->format('Y-m-d H:i e'));
         $this->assertSame(0, $offer->arrivalDayOffset());
-        $this->assertSame('Economy', $offer->cabinClass);
+        $this->assertSame('economy', $offer->cabinClass);
         $this->assertSame(1, $offer->baggageCount('checked'));
         $this->assertSame(1, $offer->baggageCount('carry_on'));
         $this->assertSame(472, $offer->co2Kg);

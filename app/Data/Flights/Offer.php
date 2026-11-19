@@ -16,7 +16,7 @@ final readonly class Offer
      * @param int $durationMinutes Whole trip incl. layovers
      * @param non-empty-list<Segment> $segments
      * @param list<Layover> $layovers
-     * @param string|null $cabinClass Marketing name, e.g. "Economy"
+     * @param string|null $cabinClass Duffel code, e.g. "economy"
      * @param string|null $fareBrand e.g. "Basic"
      * @param list<Baggage> $baggage
      * @param CarbonImmutable|null $expiresAt

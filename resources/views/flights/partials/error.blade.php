@@ -4,7 +4,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>
         </svg>
     </div>
-    <p class="mt-4 font-semibold text-slate-900">{{ __('flights.error.title') }}</p>
+    <h2 class="mt-4 font-semibold text-slate-900">{{ __('flights.error.title') }}</h2>
     <p class="mt-1 text-sm text-slate-600">{{ $message }}</p>
-    <x-button :href="request()->fullUrl()" variant="secondary" class="mt-6">{{ __('flights.error.retry') }}</x-button>
+    <x-button type="button" variant="secondary" class="mt-6" x-on:click="retry()">{{ __('flights.error.retry') }}</x-button>
 </div>

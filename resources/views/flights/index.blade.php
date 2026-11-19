@@ -2,8 +2,15 @@
     <h1 class="text-2xl font-bold text-slate-900 sm:text-3xl">{{ __('flights.title') }}</h1>
     <p class="mt-1 text-slate-600">{{ __('flights.subtitle') }}</p>
 
+    <noscript>
+        <x-alert type="error" class="mt-6">{{ __('flights.no_js') }}</x-alert>
+    </noscript>
+
     @isset($formError)
-        <x-alert type="error" class="mt-6">{{ $formError }}</x-alert>
+        <x-alert type="error" class="mt-6">
+            {{ $formError }}
+            <a href="{{ route('flights.index') }}" class="ml-1 font-semibold underline">{{ __('flights.error.reload') }}</a>
+        </x-alert>
     @else
         <section class="mt-6"
                  x-data="flightSearch({

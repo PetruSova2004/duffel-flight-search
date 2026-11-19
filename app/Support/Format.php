@@ -4,6 +4,8 @@ namespace App\Support;
 
 use App\Data\Flights\Money;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\Lang;
+use IntlDateFormatter;
 use NumberFormatter;
 
 /**
@@ -11,13 +13,20 @@ use NumberFormatter;
  */
 final class Format
 {
+    // Formatters are costly to create, the results page calls them hundreds of times
+    /** @var array<string, NumberFormatter> */
+    private static array $numberFormatters = [];
+
+    /** @var array<string, IntlDateFormatter> */
+    private static array $dateFormatters = [];
+
     /**
      * @param Money $money
      * @return string e.g. "245,90 €"
      */
     public static function money(Money $money): string
     {
-        $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
+        $formatter = self::$numberFormatters[app()->getLocale()] ??= new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
 
         return $formatter->formatCurrency((float) $money->amount, $money->currency) ?: $money->amount.' '.$money->currency;
     }
@@ -40,20 +49,20 @@ final class Format
 
     /**
      * @param CarbonInterface $date
-     * @return string e.g. "12 дек 2026"
+     * @return string e.g. "12 дек. 2026"
      */
     public static function date(CarbonInterface $date): string
     {
-        return $date->locale(app()->getLocale())->isoFormat('D MMM YYYY');
+        return self::pattern($date, 'd MMM y');
     }
 
     /**
      * @param CarbonInterface $date
-     * @return string e.g. "сб, 12 дек"
+     * @return string e.g. "сб, 12 дек."
      */
     public static function shortDate(CarbonInterface $date): string
     {
-        return $date->locale(app()->getLocale())->isoFormat('dd, D MMM');
+        return self::pattern($date, 'EEEEEE, d MMM');
     }
 
     /**
@@ -63,5 +72,35 @@ final class Format
     public static function time(CarbonInterface $date): string
     {
         return $date->format('H:i');
+    }
+
+    /**
+     * @param string|null $cabinClass Duffel code: economy, premium_economy, business, first
+     * @return string|null
+     */
+    public static function cabin(?string $cabinClass): ?string
+    {
+        if ($cabinClass === null) {
+            return null;
+        }
+
+        return Lang::has('flights.cabin.'.$cabinClass) ? __('flights.cabin.'.$cabinClass) : $cabinClass;
+    }
+
+    /**
+     * Formats in the date's own time zone, so airport-local times stay local.
+     *
+     * @param CarbonInterface $date
+     * @param string $pattern ICU pattern
+     * @return string
+     */
+    private static function pattern(CarbonInterface $date, string $pattern): string
+    {
+        $key = implode('|', [app()->getLocale(), $date->getTimezone()->getName(), $pattern]);
+        $formatter = self::$dateFormatters[$key] ??= new IntlDateFormatter(
+            app()->getLocale(), IntlDateFormatter::NONE, IntlDateFormatter::NONE, $date->getTimezone(), null, $pattern,
+        );
+
+        return $formatter->format($date) ?: $date->toDateString();
     }
 }

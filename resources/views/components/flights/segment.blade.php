@@ -27,8 +27,8 @@
                 <div>
                     <span class="font-semibold text-slate-900 tabular-nums">{{ Format::time($point->at) }}</span>
                     <span class="text-slate-600">{{ Format::shortDate($point->at) }}</span>
-                    @if ($kind === 'arrival' && $dayOffset !== 0)
-                        <span class="text-xs font-semibold text-amber-700">{{ sprintf('%+d', $dayOffset) }}</span>
+                    @if ($kind === 'arrival')
+                        <x-flights.day-offset :offset="$dayOffset" />
                     @endif
                     <span class="block text-slate-700">
                         {{ $point->airportName }} ({{ $point->airportCode }})@if ($point->terminal), {{ __('flights.offer.terminal', ['terminal' => $point->terminal]) }}@endif

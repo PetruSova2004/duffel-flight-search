@@ -43,6 +43,17 @@ class PageAccessTest extends TestCase
         $this->actingAs($user)->get(route('register'))->assertRedirect(route('flights.index'));
     }
 
+    public function test_404_keeps_the_user_header(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/no-such-page')
+            ->assertNotFound()
+            ->assertSee($user->name)
+            ->assertSee(__('app.nav.logout'));
+    }
+
     public function test_unknown_page_returns_styled_404(): void
     {
         $this->get('/no-such-page')

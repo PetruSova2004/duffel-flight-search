@@ -19,7 +19,7 @@
                 <div class="flex items-center gap-3">
                     <x-flights.airline-logo :carrier="$offer->airline" />
                     <div class="min-w-0">
-                        <p class="truncate text-sm font-semibold text-slate-900">{{ $offer->airline->name }}</p>
+                        <p class="truncate text-sm font-semibold text-slate-900" title="{{ $offer->airline->name }}">{{ $offer->airline->name }}</p>
                         <p class="truncate text-xs text-slate-500">{{ implode(', ', $offer->flightNumbers()) }}</p>
                     </div>
                 </div>
@@ -41,7 +41,7 @@
                         @if ($offer->layovers === [])
                             <p class="text-xs text-emerald-700">{{ __('flights.offer.direct') }}</p>
                         @else
-                            <p class="truncate text-xs text-amber-700">
+                            <p class="text-xs text-amber-700">
                                 {{ trans_choice('flights.offer.stops', count($offer->layovers)) }}:
                                 {{ collect($offer->layovers)->map(fn ($l) => $l->airportCode.' '.Format::duration($l->durationMinutes))->implode(', ') }}
                             </p>
@@ -50,8 +50,7 @@
 
                     <div class="shrink-0 text-right">
                         <p class="text-2xl font-bold text-slate-900 tabular-nums">
-                            {{ Format::time($arrival->at) }}@if ($dayOffset !== 0)<sup class="ml-0.5 text-xs font-semibold text-amber-700"
-                                 title="{{ $dayOffset === 1 ? __('flights.offer.next_day') : __('flights.offer.days_later', ['count' => $dayOffset]) }}">{{ sprintf('%+d', $dayOffset) }}</sup>@endif
+                            {{ Format::time($arrival->at) }}<x-flights.day-offset :offset="$dayOffset" />
                         </p>
                         <p class="text-xs text-slate-600"><abbr title="{{ $arrival->airportName }}" class="no-underline">{{ $arrival->airportCode }}</abbr> · {{ Format::shortDate($arrival->at) }}</p>
                     </div>
@@ -61,10 +60,10 @@
             <div class="flex items-end justify-between gap-4 border-t border-slate-100 pt-3 md:block md:border-t-0 md:border-l md:pt-0 md:pl-6 md:text-right">
                 <div>
                     <p class="text-2xl font-bold text-brand-700 tabular-nums">{{ Format::money($offer->price) }}</p>
-                    <p class="text-xs text-slate-500">{{ __('flights.offer.per_adult') }}@if ($offer->cabinClass) · {{ $offer->cabinClass }}@endif</p>
+                    <p class="text-xs text-slate-500">{{ __('flights.offer.per_adult') }}@if ($offer->cabinClass) · {{ Format::cabin($offer->cabinClass) }}@endif</p>
                 </div>
                 @if ($offer->expiresAt?->isFuture())
-                    <p class="text-xs text-slate-500 md:mt-1" title="{{ $offer->expiresAt->toIso8601String() }}">
+                    <p class="text-xs text-slate-500 md:mt-1" title="{{ Format::date($offer->expiresAt->setTimezone(config('app.timezone'))) }}, {{ Format::time($offer->expiresAt->setTimezone(config('app.timezone'))) }}">
                         {{ __('flights.offer.expires', ['time' => $offer->expiresAt->locale(app()->getLocale())->diffForHumans(syntax: \Carbon\CarbonInterface::DIFF_ABSOLUTE)]) }}
                     </p>
                 @endif
@@ -104,7 +103,7 @@
                     @if ($layover = $offer->layovers[$loop->index] ?? null)
                         <li class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
                             {{ __('flights.offer.layover', [
-                                'place' => trim(($layover->cityName ?? '').' ('.$layover->airportCode.')'),
+                                'place' => $layover->cityName ? $layover->cityName.' ('.$layover->airportCode.')' : $layover->airportCode,
                                 'duration' => Format::duration($layover->durationMinutes),
                             ]) }}@if ($layover->changesAirport), <strong>{{ __('flights.offer.airport_change') }}</strong>@endif
                         </li>

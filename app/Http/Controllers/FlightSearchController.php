@@ -11,47 +11,22 @@ use Illuminate\View\View;
 class FlightSearchController extends Controller
 {
     /**
-     * @param PlaceDirectory $places
-     */
-    public function __construct(private readonly PlaceDirectory $places) {}
-
-    /**
-     * Empty search form.
+     * Search form, plus results when the form was submitted.
      *
-     * @return View
-     */
-    public function index(): View
-    {
-        return $this->page();
-    }
-
-    /**
      * @param FlightSearchRequest $request
      * @param FlightSearchService $search
+     * @param PlaceDirectory $places
      * @return View
      */
-    public function search(FlightSearchRequest $request, FlightSearchService $search): View
+    public function index(FlightSearchRequest $request, FlightSearchService $search, PlaceDirectory $places): View
     {
         try {
-            return $this->page(['result' => $search->search($request->criteria())]);
+            $countries = $places->countries();
         } catch (DuffelException $e) {
-            return $this->page(['searchError' => $e->userMessage()]);
-        }
-    }
-
-    /**
-     * @param array<string, mixed> $data
-     * @return View
-     */
-    private function page(array $data = []): View
-    {
-        try {
-            $countries = $this->places->countries();
-        } catch (DuffelException $e) {
-            return view('flights.index', ['countries' => [], 'formError' => $e->userMessage()]);
+            return view('flights.index', ['formError' => $e->userMessage()]);
         }
 
-        return view('flights.index', [
+        $data = [
             'minDate' => FlightSearchRequest::minDate()->toDateString(),
             'maxDate' => FlightSearchRequest::maxDate()->toDateString(),
             'countries' => array_map(
@@ -59,7 +34,18 @@ class FlightSearchController extends Controller
                 array_keys($countries),
                 $countries,
             ),
-            ...$data,
-        ]);
+        ];
+
+        if (! $request->isSearch()) {
+            return view('flights.index', $data);
+        }
+
+        try {
+            $data['result'] = $search->search($request->criteria());
+        } catch (DuffelException $e) {
+            $data['searchError'] = $e->userMessage();
+        }
+
+        return view('flights.index', $data);
     }
 }

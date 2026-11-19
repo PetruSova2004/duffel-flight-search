@@ -5,10 +5,10 @@
 
         <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
             @auth
-                <x-button :href="route('flights.index')" class="px-6 py-3 text-base">{{ __('app.home.cta_user') }}</x-button>
+                <x-button :href="route('flights.index')" size="lg">{{ __('app.home.cta_user') }}</x-button>
             @else
-                <x-button :href="route('login')" class="px-6 py-3 text-base">{{ __('app.home.cta_guest_login') }}</x-button>
-                <x-button :href="route('register')" variant="secondary" class="px-6 py-3 text-base">{{ __('app.home.cta_guest_register') }}</x-button>
+                <x-button :href="route('login')" size="lg">{{ __('app.home.cta_guest_login') }}</x-button>
+                <x-button :href="route('register')" variant="secondary" size="lg">{{ __('app.home.cta_guest_register') }}</x-button>
             @endauth
         </div>
     </section>

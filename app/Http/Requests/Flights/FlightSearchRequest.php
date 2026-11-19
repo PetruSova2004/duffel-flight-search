@@ -8,12 +8,35 @@ use App\Support\Format;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Search parameters on GET /flights. Without any of them the page just shows the form.
+ */
 class FlightSearchRequest extends FormRequest
 {
     public const int MAX_DAYS_AHEAD = 330;
 
+    public const array FIELDS = ['departure_date', 'origin_country', 'origin', 'destination_country', 'destination'];
+
     /** @var string */
     protected $redirectRoute = 'flights.index';
+
+    /**
+     * @return bool
+     */
+    public function isSearch(): bool
+    {
+        return $this->hasAny(self::FIELDS);
+    }
+
+    /**
+     * @return void
+     */
+    public function validateResolved(): void
+    {
+        if ($this->isSearch()) {
+            parent::validateResolved();
+        }
+    }
 
     /**
      * @return array<string, mixed>
@@ -22,14 +45,14 @@ class FlightSearchRequest extends FormRequest
     {
         return [
             'departure_date' => [
-                'required', 'date_format:Y-m-d',
+                'bail', 'required', 'string', 'date_format:Y-m-d',
                 'after_or_equal:'.self::minDate()->toDateString(),
                 'before_or_equal:'.self::maxDate()->toDateString(),
             ],
             'origin_country' => ['required', 'string', 'size:2'],
-            'origin' => ['required', 'string', 'size:3', new CityInCountry('origin_country')],
+            'origin' => ['bail', 'required', 'string', 'size:3', new CityInCountry('origin_country')],
             'destination_country' => ['required', 'string', 'size:2'],
-            'destination' => ['required', 'string', 'size:3', 'different:origin', new CityInCountry('destination_country')],
+            'destination' => ['bail', 'required', 'string', 'size:3', 'different:origin', new CityInCountry('destination_country')],
         ];
     }
 
@@ -53,8 +76,8 @@ class FlightSearchRequest extends FormRequest
     public function criteria(): SearchCriteria
     {
         return new SearchCriteria(
-            departureDate: CarbonImmutable::createFromFormat('!Y-m-d', $this->string('departure_date')->value())
-                ?: self::minDate(),
+            departureDate: $this->date('departure_date', '!Y-m-d')?->toImmutable()
+                ?? throw new \LogicException('Departure date must be validated first'),
             origin: $this->string('origin')->value(),
             destination: $this->string('destination')->value(),
         );
@@ -77,12 +100,18 @@ class FlightSearchRequest extends FormRequest
     }
 
     /**
+     * Codes are compared upper-case; non-strings are left for the "string" rule.
+     *
      * @return void
      */
     protected function prepareForValidation(): void
     {
-        $this->merge(collect(['origin_country', 'origin', 'destination_country', 'destination'])
-            ->mapWithKeys(fn (string $key) => [$key => strtoupper(trim($this->string($key)->value()))])
-            ->all());
+        foreach (['origin_country', 'origin', 'destination_country', 'destination'] as $key) {
+            $value = $this->input($key);
+
+            if (is_string($value)) {
+                $this->merge([$key => strtoupper(trim($value))]);
+            }
+        }
     }
 }

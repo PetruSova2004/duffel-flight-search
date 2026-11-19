@@ -96,6 +96,36 @@ class DuffelClientTest extends TestCase
         Http::assertSentCount(2);
     }
 
+    public function test_post_is_never_retried(): void
+    {
+        Http::fake(['api.duffel.com/*' => Http::response([], 502)]);
+
+        try {
+            app(DuffelClient::class)->post('/air/offer_requests', []);
+        } catch (DuffelException) {
+        }
+
+        Http::assertSentCount(1);
+    }
+
+    public function test_repeated_cursor_stops_pagination(): void
+    {
+        Http::fake(['api.duffel.com/*' => Http::response(['data' => [['id' => 1]], 'meta' => ['after' => 'same']])]);
+
+        $this->expectException(DuffelException::class);
+
+        app(DuffelClient::class)->paginate('/air/airports')->all();
+    }
+
+    public function test_non_json_body_is_an_error(): void
+    {
+        Http::fake(['api.duffel.com/*' => Http::response('<html>ok</html>', 200)]);
+
+        $this->expectException(DuffelException::class);
+
+        app(DuffelClient::class)->get('/air/airports');
+    }
+
     public function test_it_fails_fast_without_token(): void
     {
         config(['services.duffel.token' => null]);

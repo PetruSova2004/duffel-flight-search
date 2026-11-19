@@ -44,7 +44,7 @@ class OfferMapper
                 ?? $this->diffMinutes($first->departure->at, $last->arrival->at),
             segments: $segments,
             layovers: $this->layovers($segments),
-            cabinClass: $passenger['cabin_class_marketing_name'] ?? $passenger['cabin_class'] ?? null,
+            cabinClass: $passenger['cabin_class'] ?? null,
             fareBrand: $slice['fare_brand_name'] ?? null,
             baggage: array_values(array_map(
                 fn (array $item) => new Baggage($item['type'], (int) $item['quantity']),

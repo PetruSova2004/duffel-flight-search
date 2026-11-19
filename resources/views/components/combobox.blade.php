@@ -1,4 +1,4 @@
-{{-- JS expressions (options/model/change/disabled/busy/placeholder) run in the parent Alpine scope --}}
+{{-- JS expressions (options/model/change/disabled/busy/placeholder) run in the parent Alpine scope: pass only fixed developer strings, never user or API data --}}
 @props([
     'name',
     'label',
@@ -9,6 +9,7 @@
     'busy' => 'false',
     'placeholder' => "''",
     'showCode' => false,
+    'limit' => 100,
 ])
 
 @php
@@ -23,6 +24,7 @@
         disabled: () => {{ $disabled }},
         busy: () => {{ $busy }},
         showCode: @js($showCode),
+        limit: @js($limit),
      })"
      @focusout="if (! $el.contains($event.relatedTarget)) close()"
      class="relative">
@@ -46,8 +48,8 @@
                @keydown.enter="onEnter($event)"
                @keydown.escape="open && ($event.stopPropagation(), close())"
                @class([
-                   'block w-full rounded-lg border bg-white py-2.5 pr-9 pl-3 text-sm shadow-xs placeholder:text-slate-400',
-                   'focus:border-brand-500 focus:ring-2 focus:ring-brand-100 focus:outline-none',
+                   'block w-full rounded-lg border bg-white py-2.5 pr-9 pl-3 text-sm shadow-xs placeholder:text-slate-500',
+                   'focus:border-brand-500 focus:ring-3 focus:ring-brand-500/35 focus:outline-none',
                    'disabled:cursor-not-allowed disabled:bg-slate-100',
                    'border-red-400' => $hasError,
                    'border-slate-300' => ! $hasError,
@@ -69,14 +71,14 @@
                     :class="index === active ? 'bg-brand-50 text-brand-700' : 'text-slate-700'"
                     class="flex cursor-pointer items-center justify-between gap-3 px-3 py-2">
                     <span x-text="item.name" class="truncate"></span>
-                    <span x-show="@js($showCode)" x-text="item.code" class="shrink-0 text-xs text-slate-400"></span>
+                    <span x-show="@js($showCode)" x-text="item.code" class="shrink-0 text-xs text-slate-500"></span>
                 </li>
             </template>
         </ul>
         <p x-show="isBusy" class="px-3 py-2 text-sm text-slate-500">{{ __('flights.form.cities_loading') }}</p>
         <p x-show="! isBusy && visible.length === 0" class="px-3 py-2 text-sm text-slate-500">{{ __('flights.form.nothing_found') }}</p>
         <p x-show="truncated" class="border-t border-slate-100 px-3 py-2 text-xs text-slate-500">
-            {{ __('flights.form.refine', ['count' => 100]) }}
+            {{ __('flights.form.refine', ['count' => $limit]) }}
         </p>
     </div>
 

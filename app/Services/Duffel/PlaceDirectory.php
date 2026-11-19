@@ -23,6 +23,9 @@ class PlaceDirectory
     /** @var array{countries: array<string, string>, cities: array<string, array<string, string>>}|null */
     private ?array $places = null;
 
+    /** Remembered for the rest of the request, so a failing Duffel is not called again */
+    private ?DuffelException $failure = null;
+
     /**
      * @param DuffelClient $client
      * @param int $ttl Cache lifetime in seconds
@@ -93,6 +96,23 @@ class PlaceDirectory
             return $this->places;
         }
 
+        if ($this->failure !== null) {
+            throw $this->failure;
+        }
+
+        try {
+            return $this->load();
+        } catch (DuffelException $e) {
+            throw $this->failure = $e;
+        }
+    }
+
+    /**
+     * @return array{countries: array<string, string>, cities: array<string, array<string, string>>}
+     * @throws DuffelException
+     */
+    private function load(): array
+    {
         $cached = Cache::get(self::CACHE_KEY);
 
         if ($this->isValid($cached)) {
@@ -109,7 +129,7 @@ class PlaceDirectory
             throw new DuffelException(DuffelErrorType::Unavailable, 'Places directory is still being built', null, $e);
         }
 
-        return $this->places ?? $this->refresh();
+        return $this->places ?? throw new DuffelException(DuffelErrorType::Unavailable, 'Places directory is empty');
     }
 
     /**
@@ -143,7 +163,7 @@ class PlaceDirectory
         }
 
         if ($cities === []) {
-            throw new DuffelException(DuffelErrorType::Unknown, 'Duffel returned no airports');
+            throw new DuffelException(DuffelErrorType::Unavailable, 'Duffel returned no airports');
         }
 
         $collator = new Collator(app()->getLocale());

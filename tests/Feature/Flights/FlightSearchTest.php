@@ -29,7 +29,7 @@ class FlightSearchTest extends TestCase
 
     public function test_guest_cannot_search(): void
     {
-        $this->get(route('flights.search', $this->searchQuery()))->assertRedirect(route('login'));
+        $this->get(route('flights.index', $this->searchQuery()))->assertRedirect(route('login'));
     }
 
     public function test_form_lists_countries(): void
@@ -48,7 +48,7 @@ class FlightSearchTest extends TestCase
         $this->fakeDuffel(['api.duffel.com/air/offer_requests*' => Http::response($this->offerRequestFixture(), 201)]);
 
         $this->actingAs($this->user)
-            ->get(route('flights.search', $this->searchQuery()))
+            ->get(route('flights.index', $this->searchQuery()))
             ->assertOk()
             ->assertSeeInOrder(['Iberia', "218,22\u{a0}€", 'Air Transat', "670,26\u{a0}€"])
             ->assertSee(__('flights.offer.direct'))
@@ -61,12 +61,47 @@ class FlightSearchTest extends TestCase
             && $request['data']['cabin_class'] === 'economy');
     }
 
+    public function test_date_boundaries_are_accepted(): void
+    {
+        $this->fakeDuffel(['api.duffel.com/air/offer_requests*' => Http::response($this->offerRequestFixture(), 201)]);
+
+        foreach ([0, 330] as $days) {
+            $this->actingAs($this->user)
+                ->get(route('flights.index', [...$this->searchQuery(), 'departure_date' => today()->addDays($days)->toDateString()]))
+                ->assertOk()
+                ->assertSessionHasNoErrors();
+        }
+    }
+
+    public function test_form_shows_error_when_directory_is_down(): void
+    {
+        Http::fake(['api.duffel.com/*' => Http::response(['errors' => []], 401)]);
+
+        $this->actingAs($this->user)
+            ->get(route('flights.index'))
+            ->assertOk()
+            ->assertSee(__('duffel.errors.unauthorized'));
+
+        Http::assertSentCount(1);
+    }
+
+    public function test_all_broken_offers_are_an_error_not_an_empty_result(): void
+    {
+        $this->fakeDuffel(['api.duffel.com/air/offer_requests*' => Http::response(['data' => ['offers' => [['id' => 'off_1']]]], 201)]);
+
+        $this->actingAs($this->user)
+            ->get(route('flights.index', $this->searchQuery()))
+            ->assertOk()
+            ->assertSee(__('flights.error.title'))
+            ->assertDontSee(__('flights.empty.title'));
+    }
+
     public function test_empty_result_has_its_own_screen(): void
     {
         $this->fakeDuffel(['api.duffel.com/air/offer_requests*' => Http::response(['data' => ['offers' => [], 'slices' => []]], 201)]);
 
         $this->actingAs($this->user)
-            ->get(route('flights.search', $this->searchQuery()))
+            ->get(route('flights.index', $this->searchQuery()))
             ->assertOk()
             ->assertSee(__('flights.empty.title'));
     }
@@ -76,7 +111,7 @@ class FlightSearchTest extends TestCase
         $this->fakeDuffel(['api.duffel.com/air/offer_requests*' => Http::response(['errors' => [['message' => 'Boom']]], 503)]);
 
         $this->actingAs($this->user)
-            ->get(route('flights.search', $this->searchQuery()))
+            ->get(route('flights.index', $this->searchQuery()))
             ->assertOk()
             ->assertSee(__('flights.error.title'))
             ->assertSee(__('duffel.errors.unavailable'))
@@ -109,7 +144,7 @@ class FlightSearchTest extends TestCase
 
         $this->actingAs($this->user)
             ->from(route('flights.index'))
-            ->get(route('flights.search', [...$this->searchQuery(), ...$override]))
+            ->get(route('flights.index', [...$this->searchQuery(), ...$override]))
             ->assertRedirect(route('flights.index'))
             ->assertSessionHasErrors($field)
             ->assertSessionHasInput('origin', $override['origin'] ?? 'LON');

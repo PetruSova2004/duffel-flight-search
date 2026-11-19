@@ -74,7 +74,8 @@ class LoginTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)->get('/logout')->assertMethodNotAllowed();
+        $this->actingAs($user)->get('/logout')->assertNotFound();
+        $this->assertAuthenticatedAs($user);
 
         $this->actingAs($user)->post(route('logout'))->assertRedirect(route('home'));
         $this->assertGuest();

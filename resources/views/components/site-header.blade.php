@@ -17,7 +17,12 @@
         <div class="hidden items-center gap-2 md:flex">
             @auth
                 <a href="{{ route('password.edit') }}" title="{{ __('app.nav.password') }}"
-                   class="max-w-48 truncate rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                   @if (request()->routeIs('password.edit')) aria-current="page" @endif
+                   @class([
+                       'max-w-48 truncate rounded-lg px-3 py-2 text-sm font-medium',
+                       'bg-brand-50 text-brand-700' => request()->routeIs('password.edit'),
+                       'text-slate-700 hover:bg-slate-100' => ! request()->routeIs('password.edit'),
+                   ])>
                     {{ auth()->user()->name }}
                 </a>
                 <form method="POST" action="{{ route('logout') }}">
@@ -27,7 +32,7 @@
             @else
                 <x-nav-link route="login">{{ __('app.nav.login') }}</x-nav-link>
                 <x-button :href="route('register')" :aria-current="request()->routeIs('register') ? 'page' : null"
-                          @class(['ring-2 ring-brand-100 ring-offset-1' => request()->routeIs('register')])>
+                          @class(['ring-2 ring-brand-300 ring-offset-2' => request()->routeIs('register')])>
                     {{ __('app.nav.register') }}
                 </x-button>
             @endauth

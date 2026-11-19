@@ -8,7 +8,7 @@
 
             <label class="flex items-center gap-2 text-sm text-slate-700">
                 <input type="checkbox" name="remember" value="1" @checked(old('remember'))
-                       class="size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+                       class="size-4 accent-brand-600">
                 {{ __('auth.login.remember') }}
             </label>
 

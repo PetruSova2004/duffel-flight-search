@@ -32,11 +32,12 @@ return [
         'token' => env('DUFFEL_TOKEN'),
         'base_url' => env('DUFFEL_BASE_URL', 'https://api.duffel.com'),
         'version' => 'v2',
-        // Offer search may take up to 30 s on Duffel's side
-        'timeout' => (int) env('DUFFEL_TIMEOUT', 45),
+        // Must stay below PHP's max_execution_time (30 s by default)
+        'timeout' => (int) env('DUFFEL_TIMEOUT', 28),
         'connect_timeout' => (int) env('DUFFEL_CONNECT_TIMEOUT', 10),
         'supplier_timeout' => (int) env('DUFFEL_SUPPLIER_TIMEOUT', 20000),
-        'places_ttl' => (int) env('DUFFEL_PLACES_TTL', 86400),
+        // Two days, so a failed daily refresh still leaves the old list in place
+        'places_ttl' => (int) env('DUFFEL_PLACES_TTL', 172800),
     ],
 
     'slack' => [

@@ -15,8 +15,8 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'max:255', 'confirmed', Password::defaults()],
+            'email' => ['bail', 'required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['bail', 'required', 'string', 'max:255', 'confirmed', Password::defaults()],
         ];
     }
 
@@ -25,6 +25,10 @@ class RegisterRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge(['email' => Str::lower(trim((string) $this->input('email')))]);
+        $email = $this->input('email');
+
+        if (is_string($email)) {
+            $this->merge(['email' => Str::lower(trim($email))]);
+        }
     }
 }

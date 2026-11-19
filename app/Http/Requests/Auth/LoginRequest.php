@@ -19,8 +19,8 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'password' => ['required', 'string', 'max:255'],
+            'email' => ['bail', 'required', 'string', 'email', 'max:255'],
+            'password' => ['bail', 'required', 'string', 'max:255'],
             'remember' => ['nullable', 'boolean'],
         ];
     }
@@ -50,7 +50,11 @@ class LoginRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge(['email' => Str::lower(trim((string) $this->input('email')))]);
+        $email = $this->input('email');
+
+        if (is_string($email)) {
+            $this->merge(['email' => Str::lower(trim($email))]);
+        }
     }
 
     /**
@@ -75,6 +79,6 @@ class LoginRequest extends FormRequest
      */
     private function throttleKey(): string
     {
-        return 'login:'.$this->input('email').'|'.$this->ip();
+        return 'login:'.$this->string('email').'|'.$this->ip();
     }
 }

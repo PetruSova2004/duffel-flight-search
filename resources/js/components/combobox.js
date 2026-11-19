@@ -1,7 +1,5 @@
 // Select with type-to-filter (WAI-ARIA combobox pattern). Value lives in the parent component.
-const LIMIT = 100;
-
-export default ({ options, value, onChange, disabled = () => false, busy = () => false, showCode = false }) => ({
+export default ({ options, value, onChange, disabled = () => false, busy = () => false, showCode = false, limit = 100 }) => ({
     query: '',
     open: false,
     active: -1,
@@ -44,11 +42,11 @@ export default ({ options, value, onChange, disabled = () => false, busy = () =>
     },
 
     get visible() {
-        return this.matches.slice(0, LIMIT);
+        return this.matches.slice(0, limit);
     },
 
     get truncated() {
-        return this.matches.length > LIMIT;
+        return this.matches.length > limit;
     },
 
     labelOf(item) {
